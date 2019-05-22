@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>病历列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+    <link rel="stylesheet" href="static/css/xadmin.css" media="all">
+    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="static/lib/layui/layui.js" charset="utf-8"></script>
+    <!-- <script type="text/javascript" src="./js/xadmin.js"></script> -->
+    <style>
+        body {
+            padding: 20px;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+    </style>
+</head>
+
+
+<body>
+    <div style="height:40px;">
+        <span class="layui-breadcrumb" style="visibility: visible;">
+            <a href="javascript:;">首页</a><span lay-separator="">/</span>
+            <a href="javascript:;">病历管理</a><span lay-separator="">/</span>
+            <a>
+                <cite>病历列表</cite></a>
+        </span>
+        <a class="layui-btn layui-btn-small layui-bg-cyan" style="float:right"
+            href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh"></i></a>
+    </div>
+
+    <fieldset class="layui-elem-field">
+        <legend>病历数据中心</legend>
+        <div class="layui-field-box">
+            <form class="layui-form layui-form-pane">
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">病历号</label>
+                    <div class="layui-input-inline layui-col-md1">
+                        <input type="text" name="reload-id" id="reload-id" placeholder="请输入病历号" autocomplete="off"
+                            class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">姓名</label>
+                    <div class="layui-input-inline layui-col-md1">
+                        <input type="text" name="reload-name" id="reload-name" placeholder="请输入姓名" autocomplete="off"
+                            class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">属性</label>
+                    <div class="layui-input-inline layui-col-md1">
+                        <input type="text" name="reload-attrd" id="reload-name" placeholder="请输入属性" autocomplete="off"
+                            class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <label class="layui-form-label">起止时间</label>
+                    <div class="layui-input-inline">
+                        <input type="text" class="layui-input" id="datetime">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-inline">
+                    <div type="submit" class="layui-btn layui-bg-blue" data-type="reload" lay-filter="sreach"><i
+                            class="layui-icon">&#xe615;</i></div>
+                </div>
+            </form>
+        </div>
+    </fieldset>
+    <div>
+        <table class="layui-table" id="module" lay-filter="module" tablename="list"></table>
+    </div>
+</body>
+
+<script type="text/html" id="Headbar">
+            <a class="layui-btn layui-btn-xs layui-bg-cyan" lay-event="view"><i class="layui-icon layui-icon-about"></i>查看</a>
+            <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del"><i class="layui-icon layui-icon-delete"></i>删除</a>
+        </script>
+<script type="text/html" id="toolbar">
+      <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="getCheckData">获取选中行数据</button>
+        <button class="layui-btn layui-btn-sm layui-btn-disabled" lay-event="add" disabled><i class="layui-icon layui-icon-add-1"></i>添加</button>
+        <!-- <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="delete">删除选中</button> -->
+      </div>
+</script>
+<script>
+    layui.use(['table', 'laydate'], function () {
+        var table = layui.table;
+        var tableName = document.getElementById("module").attributes["tablename"].value;
+
+        //渲染
+        tableIns = table.render({
+            elem: '#module'
+            , height: 'full'
+            , title: '病历表'
+            , url: 'data/test.json'
+            // , skin: 'row'
+            , method: 'GET'
+            , page: {
+                theme: '#2F4056'
+            }
+            , id: "module"
+            , totalRow: true
+            , toolbar: '#toolbar'
+            , limit: 20
+            , cols: [[ //表头
+                { type: 'checkbox'},
+                { field: 'id', title: '病历号', sort: true, totalRowText: '合计' },
+                { field: 'name', title: '姓名', sort: true },
+                { field: 'sex', title: '性别', sort: true },
+                { field: 'age', title: '年龄', sort: true },
+                { field: 'time', title: '操作时间', sort: true },
+                { title: '操作', toolbar: '#Headbar' }
+            ]]
+        });
+
+        window.onresize = function () {
+            table.resize('module');
+        }
+
+        //监听表格复选框选择
+        table.on('checkbox(module)', function (obj) {
+            console.log(obj)
+        });
+
+        var laydate = layui.laydate;
+        //年范围选择
+        laydate.render({
+            elem: '#datetime'
+            , type: 'date'
+            , value: '2018-05-20 - 2019-05-20'
+            , range: true
+        });
+
+        //监听行工具事件
+        table.on('tool(module)', function (obj) {
+            var data = obj.data;
+            // console.log(data)
+            var url = "item-search-evaluate?id=" + data["ZCH"];
+            switch (obj.event) {
+                case 'edit':
+                    break;
+                case 'view':
+                    parent.xadmin.add_tab(data["name"], 'medical_record.html')
+                    break;
+                case 'del':
+                    layer.confirm('确认要删除吗？', function (index) {
+                        //发异步删除数据
+                        // $.post(
+                        //     url = './api/evaluate',
+                        //     data = {
+                        //         token: 'secret',
+                        //         action: 'delete',
+                        //         table: tableName,
+                        //         key: JSON.stringify(data)
+                        //     },
+                        //     success = function (res) {
+                        //         console.log(res);
+                        //         res = JSON.parse(res);
+                        //         if (res["code"] == 1) {
+                        //             // 更新页面元素,执行重载
+                        //             setTimeout("active[reload].call(this)", 2000);
+                        //             layer.msg(res["msg"]);
+                        //         }
+                        //         else {
+                        //             layer.msg(res["msg"]);
+                        //         }
+                        //     }
+                        // );
+                        layer.msg("删除成功！")
+                    });
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        //工具栏事件
+        table.on('toolbar(module)', function (obj) {
+            var checkStatus = table.checkStatus(obj.config.id);
+            switch (obj.event) {
+                case 'add':
+                    layer.msg('添加');
+                    break;
+                case 'update':
+                    layer.msg('编辑');
+                    break;
+                case 'delete':
+                    var data = checkStatus.data;
+                    layer.alert(JSON.stringify(data));
+                    // console.log("delete data");
+                    // console.log(JSON.stringify(data));
+                    layer.confirm('确认要删除吗?', function (index) {
+                        //捉到所有被选中的，发异步进行删除
+                        layer.msg('删除成功', { icon: 1 });
+                        $(".layui-form-checked").not('.header').parents('tr').remove();
+                    });
+                    // layer.msg('删除');
+                    break;
+                case 'getCheckData':
+                    var data = checkStatus.data;
+                    layer.alert(JSON.stringify(data));
+                    break;
+                case 'getCheckLength':
+                    var data = checkStatus.data;
+                    layer.msg('选中了：' + data.length + ' 个');
+                    break;
+                case 'isAll':
+                    layer.msg(checkStatus.isAll ? '全选' : '未全选')
+                    break;
+            };
+        });
+
+        $('i').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+        $('.layui-btn').on('click', function () {
+            var type = $(this).data('type');
+            active[type] ? active[type].call(this) : '';
+        });
+    });
+</script>
