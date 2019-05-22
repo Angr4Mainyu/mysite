@@ -27,7 +27,7 @@
         <!-- 顶部开始 -->
         <div class="container">
             <div class="logo">
-                <a href="./index.html">医院数据管理系统</a></div>
+                <a href="./index">医院数据管理系统</a></div>
             <div class="left_open">
                 <a><i title="展开左侧栏" class="iconfont">&#xe699;</i></a>
             </div>
@@ -64,7 +64,7 @@
                         <dd>
                             <a onclick="xadmin.open('切换帐号','')">切换帐号</a></dd>
                         <dd>
-                            <a href="./login.html">退出</a></dd>
+                            <a href="logout">退出</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item to-index">
@@ -89,7 +89,7 @@
                                     <cite>统计页面</cite></a>
                             </li>
                             <li>
-                                <a onclick="xadmin.add_tab('新增病历','item-add.html')">
+                                <a onclick="xadmin.add_tab('新增病历','medical_record',true)">
                                     <i class="iconfont">&#xe6a7;</i>
                                     <cite>新增病历</cite></a>
                             </li>
@@ -208,7 +208,7 @@
                 </div>
                 <div class="layui-tab-content">
                     <div class="layui-tab-item layui-show">
-                        <iframe src='./case_list' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
+                        <iframe src='case_list' frameborder="0" scrolling="yes" class="x-iframe"></iframe>
                     </div>
                 </div>
                 <div id="tab_show"></div>
