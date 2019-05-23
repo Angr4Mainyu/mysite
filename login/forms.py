@@ -35,8 +35,8 @@ class RecordForm(forms.Form):
     sex = forms.ChoiceField(label='性别', choices=gender)
     age = forms.IntegerField(label="年龄", widget=forms.TextInput(
         attrs={'class': 'form-control layui-input'}))
-    idcard = forms.IntegerField(
-        label="身份证号", widget=forms.TextInput(attrs={'class': 'form-control layui-input', 'lay-verify': 'identity'}))
+    idcard = forms.CharField(
+        label="身份证号", max_length=128, widget=forms.TextInput(attrs={'class': 'form-control layui-input', 'lay-verify': 'identity'}))
     attr = forms.CharField(label="属性", max_length=1024, widget=forms.TextInput(
         attrs={'class': 'form-control layui-input'}))
     birthday = forms.DateField(
@@ -50,3 +50,21 @@ class RecordForm(forms.Form):
         label="病史", max_length=1024, widget=forms.Textarea(attrs={'class': 'layui-textarea'}))
     medical_advice = forms.CharField(
         label="医生意见", max_length=1024, widget=forms.Textarea(attrs={'class': 'layui-textarea'}))
+
+
+class CaseForm(forms.Form):
+    attrs = (
+        ('','请选择部门'),
+        ('医疗部', '医疗部'),
+        ('门诊部', '门诊部'),
+        ('住院部', '住院部'),
+        ('医务部', '医务部'),
+        ('护理部', '护理部'),
+        ('住院部', '住院部'),
+        ('院长', '院长')
+    )
+    
+    rid = forms.CharField(label="病历号", max_length=128, widget=forms.TextInput(attrs={'class': 'form-control layui-input'}))
+    name = forms.CharField(label="姓名", max_length=128, widget=forms.TextInput(
+        attrs={'class': 'form-control layui-input'}))
+    attr = forms.ChoiceField(label="所属部门",choices=attrs)

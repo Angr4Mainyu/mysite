@@ -1,3 +1,4 @@
+{% load staticfiles %}
 <!DOCTYPE html>
 
 <head>
@@ -11,9 +12,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
 
-    <link rel="stylesheet" href="static/css/xadmin.css" media="all">
-    <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
-    <script src="static/lib/layui/layui.js" charset="utf-8"></script>
+    <link rel="stylesheet" href="{%static 'css/xadmin.css'%}" media="all">
+    <script src="{%static 'lib/layui/layui.js'%}" charset="utf-8"></script>
+    <script src="{%static 'js/jquery.min.js'%}" charset="utf-8"></script>
     <!-- <script type="text/javascript" src="./js/xadmin.js"></script> -->
     <style>
         body {
@@ -45,34 +46,25 @@
             <form class="layui-form layui-form-pane">
                 {% csrf_token %}
                 <div class="layui-form-item layui-inline">
-                    <label class="layui-form-label">病历号</label>
+                    <label class="layui-form-label">{{case_form.rid.label}}</label>
                     <div class="layui-input-inline layui-col-md1">
-                        <input type="text" name="reload-id" id="reload-id" placeholder="请输入病历号" autocomplete="off"
-                            class="layui-input">
+                        {{case_form.rid}}
                     </div>
                 </div>
                 <div class="layui-form-item layui-inline">
-                    <label class="layui-form-label">姓名</label>
+                    <label class="layui-form-label">{{case_form.name.label}}</label>
                     <div class="layui-input-inline layui-col-md1">
-                        <input type="text" name="reload-name" id="reload-name" placeholder="请输入姓名" autocomplete="off"
-                            class="layui-input">
+                        {{case_form.name}}
                     </div>
                 </div>
                 <div class="layui-form-item layui-inline">
-                    <label class="layui-form-label">属性</label>
+                    <label class="layui-form-label">{{case_form.attr.label}}</label>
                     <div class="layui-input-inline layui-col-md1">
-                        <input type="text" name="reload-attrd" id="reload-name" placeholder="请输入属性" autocomplete="off"
-                            class="layui-input">
+                        {{case_form.attr}}
                     </div>
                 </div>
                 <div class="layui-form-item layui-inline">
-                    <label class="layui-form-label">起止时间</label>
-                    <div class="layui-input-inline">
-                        <input type="text" class="layui-input" id="datetime">
-                    </div>
-                </div>
-                <div class="layui-form-item layui-inline">
-                    <div type="submit" class="layui-btn layui-bg-blue" data-type="reload" lay-filter="sreach"><i
+                    <div type="submit" class="layui-btn layui-bg-blue" data-type="reload" lay-filter="search"><i
                             class="layui-icon">&#xe615;</i></div>
                 </div>
             </form>
@@ -95,8 +87,8 @@
       </div>
 </script>
 <script>
-    layui.use(['table', 'laydate'], function () {
-        var table = layui.table;
+    layui.use(['table', 'laydate', 'form'], function () {
+        var table = layui.table, form = layui.form;
         var tableName = document.getElementById("module").attributes["tablename"].value;
 
         //渲染
@@ -106,17 +98,17 @@
             , title: '病历表'
             , url: 'case_list'
             // , skin: 'row'
-            ,where:{
-                'csrfmiddlewaretoken':$("input[name='csrfmiddlewaretoken']").val()
+            , where: {
+                'csrfmiddlewaretoken': $("input[name='csrfmiddlewaretoken']").val()
             }
             , method: 'POST'
             , id: "module"
             , totalRow: true
             , toolbar: '#toolbar'
             , limit: 10
-            , page:true
+            , page: true
             , cols: [[ //表头
-                { type: 'checkbox'},
+                { type: 'checkbox' },
                 { field: 'id', title: '病历号', sort: true, totalRowText: '合计' },
                 { field: 'name', title: '姓名', sort: true },
                 { field: 'sex', title: '性别', sort: true },
@@ -138,7 +130,7 @@
         var laydate = layui.laydate;
         //年范围选择
         laydate.render({
-            elem: '#datetime'
+            elem: '#id_date'
             , type: 'date'
             , value: '2018-05-20 - 2019-05-20'
             , range: true
@@ -222,6 +214,33 @@
                     break;
             };
         });
+
+        var active = {
+            add: function () {
+                table.addRow('module')
+            },
+            reload: function () {
+                //执行重载
+                console.log("start reload");
+                var key = {
+                    'reload-rid': $("#reload-id").val() == "" ? undefined : $("#reload-id").val(),
+                    'reload-attr': $("#reload-industry").val() == "" ? undefined : $("#reload-industry").val(),
+                    'reload-name': $("#reload-name").val() == "" ? undefined : $("#reload-name").val(),
+                }
+                tableIns.reload({
+                    page: {
+                        curr: 1 //重新从第 1 页开始
+                    }
+                    , where: {
+                        'csrfmiddlewaretoken': $("input[name='csrfmiddlewaretoken']").val(),
+                        'reload-rid': $("#id_rid").val() == "" ? undefined : $("#id_rid").val(),
+                        'reload-attr': $("#id_attr").val() == "" ? undefined : $("#id_attr").val(),
+                        'reload-name': $("#id_name").val() == "" ? undefined : $("#id_name").val(),
+                    }
+                });
+
+            }
+        };
 
         $('i').on('click', function () {
             var type = $(this).data('type');

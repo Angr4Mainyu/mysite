@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.shortcuts import redirect, HttpResponse
 import json
 from . import models
-from .forms import UserForm, RegisterForm, RecordForm
+from .forms import UserForm, RegisterForm, RecordForm, CaseForm
 import hashlib
 
 from .cpabe import PairingGroup, CPabe_sheme
@@ -157,11 +157,26 @@ def case_list(request):
         print(request.POST)
         page = int(request.POST.get('page'))
         limit = int(request.POST.get('limit'))
-        if models.Record.objects.all().count() < (page-1)*limit:  # 查询的范围超过了已存储的病例范围
+        _rid = request.POST.get('reload-rid')
+        _attr = request.POST.get('reload-attr')
+        _name = request.POST.get('reload-name')
+
+        record_list = models.Record.objects.all()
+        try:
+            if _rid != "" and _rid != None:
+                record_list = record_list.filter(rid=_rid)
+            if _attr != "" and _attr != None:
+                record_list = record_list.filter(attr=_attr)
+            if _name != "" and _name != None:
+                record_list = record_list.filter(name=_name)
+        except:  # 没有符合条件的病历
             result = {'code': 0, 'msg': "Query failed"}
             return HttpResponse(json.dumps(result), content_type="application/json")
 
-        record_list = models.Record.objects.all()
+        if record_list.all().count() < (page-1)*limit:  # 查询的范围超过了已存储的病例范围
+            result = {'code': 0, 'msg': "Query failed"}
+            return HttpResponse(json.dumps(result), content_type="application/json")
+
         total = len(record_list)
         record_list = record_list[(page-1)*limit:page*limit]
         data = []
@@ -179,18 +194,23 @@ def case_list(request):
                   'data': data}
         return HttpResponse(json.dumps(result), content_type="application/json")
 
-    login_form = UserForm()
+    case_form = CaseForm()
     return render(request, 'login/case_list.html', locals())
+
+# 添加病历
 
 
 def add_case(request):
     if request.method == "POST":
         Record_Form = RecordForm(request.POST)
-        message = "请检查填写的内容！"
+        print(request.POST)
+        response = {}
+        response["msg"] = "请检查填写的内容！"
+        response["code"] = 1
         if Record_Form.is_valid():  # 获取数据
             name = Record_Form.cleaned_data['name']
             sex = Record_Form.cleaned_data['sex']
-            age = Record_Form.cleaned_data['age']
+            age = int(Record_Form.cleaned_data['age'])
             u_idcard = Record_Form.cleaned_data['idcard']
             attr = Record_Form.cleaned_data['attr']
             birthday = Record_Form.cleaned_data['birthday']
@@ -200,46 +220,53 @@ def add_case(request):
             medical_history = Record_Form.cleaned_data['medical_history']
             medical_advice = Record_Form.cleaned_data['medical_advice']
 
-            if False:  # 添加病例时的合法性校验
-                message = "添加病例时对表单的合法性校验"
-                return render(request, 'login/add_case.html', locals())
-            else:
-                same_id_user = models.Record.objects.filter(name=u_idcard)
-                if same_id_user:  # 用户名唯一
-                    message = '该用户已拥有病例,请勿重复创建'
-                    return render(request, 'login/add_case.html', locals())
-                attr_list = attr.strip().split(',')
-                for i in attr_list:
-                    if i not in attrs:
-                        message = '属性不合法, 属性间请用 , 间隔开。'
-                        return render(request, 'login/add_case.html', locals())
+            same_id_user = models.Record.objects.filter(name=u_idcard)
+            if same_id_user:  # 用户名唯一
+                response["msg"] = '该用户已拥有病例,请勿重复创建'
+                response["code"] = 1
+                return HttpResponse(json.dumps(response), content_type="application/json")
+            attr_list = attr.strip().split(',')
+            for i in attr_list:
+                if i not in attrs:
+                    response["msg"] = '属性不合法, 属性间请用 , 间隔开。'
+                    response["code"] = 1
+                    return HttpResponse(json.dumps(response), content_type="application/json")
 
-                # 当一切都OK的情况下，创建新记录
+            # 当一切都OK的情况下，创建新记录
+            print("check_is_ok")
+            new_record = models.Record.objects.create()
 
-                new_record = models.User.objects.create()
-                new_record.name = name
-                new_record.sex = sex
-                new_record.age = age
-                new_record.attr = attr
-                detail = {}
-                detail['brithday'] = birthday
-                detail['phone'] = phone
-                detail['address'] = address
-                detail['marital_status'] = marital_status
-                detail['medical_history'] = medical_history
-                detail['medical_advice'] = medical_advice
+            new_record.name = name
+            new_record.sex = sex
+            new_record.age = age
+            new_record.attr = attr
+            new_record.idcard = u_idcard
+            detail = {}
+            detail['brithday'] = str(birthday)
+            detail['phone'] = phone
+            detail['address'] = address
+            detail['marital_status'] = marital_status
+            detail['medical_history'] = medical_history
+            detail['medical_advice'] = medical_advice
 
-                # todo  detail加密再存储
-                new_record.detail = json.dumps(detail)
+            # todo  detail加密再存储
+            new_record.detail = json.dumps(detail)
 
-                new_record.save()
-                return redirect('/login')  # todo 返回添加病例成功的页面
+            new_record.save()
+            # todo 返回添加病例成功的页面
+            response["msg"] = '添加成功'
+            response["code"] = 0
+            return HttpResponse(json.dumps(response), content_type="application/json")
+        response["msg"] = '表格数据不合法'
+        response["code"] = 1
+        return HttpResponse(json.dumps(response), content_type="application/json")
     Record_Form = RecordForm()
     return render(request, 'login/add_case.html', locals())
 
 
 def medical_record(request):
     return render(request, 'login/medical_record.html', locals())
+
 
 def logout(request):
     if not request.session.get('is_login', None):
