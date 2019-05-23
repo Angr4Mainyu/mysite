@@ -43,6 +43,7 @@
         <legend>病历数据中心</legend>
         <div class="layui-field-box">
             <form class="layui-form layui-form-pane">
+                {% csrf_token %}
                 <div class="layui-form-item layui-inline">
                     <label class="layui-form-label">病历号</label>
                     <div class="layui-input-inline layui-col-md1">
@@ -103,16 +104,17 @@
             elem: '#module'
             , height: 'full'
             , title: '病历表'
-            , url: 'data/test.json'
+            , url: 'case_list'
             // , skin: 'row'
-            , method: 'GET'
-            , page: {
-                theme: '#2F4056'
+            ,where:{
+                'csrfmiddlewaretoken':$("input[name='csrfmiddlewaretoken']").val()
             }
+            , method: 'POST'
             , id: "module"
             , totalRow: true
             , toolbar: '#toolbar'
-            , limit: 20
+            , limit: 10
+            , page:true
             , cols: [[ //表头
                 { type: 'checkbox'},
                 { field: 'id', title: '病历号', sort: true, totalRowText: '合计' },

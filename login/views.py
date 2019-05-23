@@ -154,15 +154,18 @@ def view_case(request):
 # POST 参数为 page limit
 def case_list(request):
     if request.method == "POST":
-        page = request.POST.get('page')
-        limit = request.POST.get('limit')
+        print(request.POST)
+        page = int(request.POST.get('page'))
+        limit = int(request.POST.get('limit'))
         if models.Record.objects.all().count() < (page-1)*limit:  # 查询的范围超过了已存储的病例范围
             result = {'code': 0, 'msg': "Query failed"}
             return HttpResponse(json.dumps(result), content_type="application/json")
 
-        record_list = models.Record.objects.all()[(page-1)*limit:page*limit]
+        record_list = models.Record.objects.all()
+        total = len(record_list)
+        record_list = record_list[(page-1)*limit:page*limit]
         data = []
-        for i in range(0, record_list):
+        for i in range(0, len(record_list)):
             data.append({
                 "id": record_list[i].rid,
                 "name": record_list[i].name,
@@ -172,7 +175,7 @@ def case_list(request):
             })
         result = {'code': 0,
                   'msg': "Query success",
-                  'count': limit,
+                  'count': total,
                   'data': data}
         return HttpResponse(json.dumps(result), content_type="application/json")
 
@@ -182,7 +185,7 @@ def case_list(request):
 
 def add_case(request):
     if request.method == "POST":
-        Record_Form = RegisterForm(request.POST)
+        Record_Form = RecordForm(request.POST)
         message = "请检查填写的内容！"
         if Record_Form.is_valid():  # 获取数据
             name = Record_Form.cleaned_data['name']
@@ -231,7 +234,7 @@ def add_case(request):
 
                 new_record.save()
                 return redirect('/login')  # todo 返回添加病例成功的页面
-    Record_Form = RegisterForm()
+    Record_Form = RecordForm()
     return render(request, 'login/add_case.html', locals())
 
 
