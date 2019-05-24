@@ -1,0 +1,218 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <title>病历详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="format-detection" content="telephone=no">
+
+    <link rel="stylesheet" href="{%static 'css/xadmin.css'%}" media="all">
+    <script src="{%static 'js/jquery.min.js'%}" charset="utf-8"></script>
+    <script src="{%static 'lib/layui/layui.js'%}" charset="utf-8"></script>
+    <script type="text/javascript" src="{%static 'js/xadmin.js'%}"></script>
+    <style>
+        body {
+            padding: 20px;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div style="height:40px;">
+        <span class="layui-breadcrumb" style="visibility: visible;">
+            <a href="javascript:;">首页</a><span lay-separator="">/</span>
+            <a href="javascript:;">病历管理</a><span lay-separator="">/</span>
+            <a>
+                <cite>病历详情</cite></a>
+        </span>
+        <a class="layui-btn layui-btn-small layui-bg-cyan" style="float:right"
+            href="javascript:location.replace(location.href);" title="刷新">
+            <i class="layui-icon layui-icon-refresh"></i></a>
+    </div>
+
+    <fieldset class="layui-elem-field">
+        <legend>病历详情</legend>
+        <div class="layui-field-box">
+            <div class="layui-row">
+                <form class="layui-form layui-form-pane layui-anim-scale" id="record" lay-filter="record">
+                    {% csrf_token %}
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">{{Record_Form.name.label}}</label>
+                            <div class="layui-input-inline">
+                                {{Record_Form.name}}
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">{{Record_Form.sex.label}}</label>
+                            <div class="layui-input-inline">
+                                {{Record_Form.sex}}
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">{{Record_Form.age.label}}</label>
+                            <div class="layui-input-inline">
+                                {{Record_Form.age}}
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">{{Record_Form.idcard.label}}</label>
+                            <div class="layui-input-inline">
+                                {{Record_Form.idcard}}
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+
+                            <label class="layui-form-label">{{Record_Form.marital_status.label}}</label>
+                            <div class="layui-input-inline">
+                                {{Record_Form.marital_status}}
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">{{Record_Form.birthday.label}}</label>
+                            <div class="layui-input-inline">
+                                {{Record_Form.birthday}}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-inline">
+                            <label class="layui-form-label">{{Record_Form.attr.label}}</label>
+                            <div class="layui-input-inline">
+                                {{Record_Form.attr}}
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">{{Record_Form.address.label}}</label>
+                            <div class="layui-input-inline">
+                                {{Record_Form.address}}
+                            </div>
+                        </div>
+                        <div class="layui-inline">
+                            <label class="layui-form-label">{{Record_Form.phone.label}}</label>
+                            <div class="layui-input-inline">
+                                {{Record_Form.phone}}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">{{Record_Form.medical_history.label}}</label>
+                        <div class="layui-input-block">
+                            {{Record_Form.medical_history}}
+                        </div>
+                    </div>
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">{{Record_Form.medical_advice.label}}</label>
+                        <div class="layui-input-block">
+                            {{Record_Form.medical_advice}}
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn" lay-submit="" lay-filter="submit">立即提交</button>
+                            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </fieldset>
+    <script>
+        layui.use(['form', 'layedit', 'laydate'], function () {
+            var form = layui.form
+                , layer = layui.layer
+                , layedit = layui.layedit
+                , laydate = layui.laydate;
+
+            $('label').addClass('layui-form-label')
+            $('.form-control').addClass('layui-input-inline')
+
+            //日期
+            laydate.render({
+                elem: '#id_birthday',
+                type: 'date'
+            });
+
+            //监听提交
+            form.on('submit(submit)', function (data) {
+
+                // layer.msg(JSON.stringify(data.field));
+                $.ajax({
+                    url: '/view_case',
+                    data: data.field,
+                    dataType: 'text',
+                    type: 'POST',
+                    success: function (data) {
+                        console.log(data);
+                        data = JSON.parse(data);
+                        layer.msg(data["msg"]);
+                        if (data["code"] == '0') {
+                            location.href = "/case_list";
+                            return true;
+                        }
+                        return false;
+                    }
+                })
+                return false;
+            });
+
+            function load(data) {
+                $.ajax({
+                    url: '/view_case',
+                    data: data,
+                    dataType: 'text',
+                    type: 'POST',
+                    success: result => {
+                        console.log(result);
+                        result = JSON.parse(result);
+                        layer.msg(result["msg"]);
+                        if (result.data != undefined) {
+                            console.log(result.data)
+                            form.val('record', result.data);
+                        }
+
+                    }
+                })
+
+
+            }
+
+            // 获取get参数
+            function getQueryString(name) {
+                var reg = new RegExp('(^|&)' + name + '=([^&]*)(&|$)', 'i');
+                var r = window.location.search.substr(1).match(reg);
+                if (r != null) {
+                    return unescape(r[2]);
+                }
+                return undefined;
+            }
+
+            window.onload = function () {
+                data = {
+                    record_id: getQueryString('id'),
+                    'csrfmiddlewaretoken': $("input[name='csrfmiddlewaretoken']").val()
+                }
+                if (JSON.stringify(data) != "{}") {
+                    load(data);
+                }
+            }
+
+        });
+    </script>
+
+</body>

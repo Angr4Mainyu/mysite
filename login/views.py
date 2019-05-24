@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import redirect, HttpResponse
+from django.core import serializers
+from django.forms.models import model_to_dict
 import json
 from . import models
 from .forms import UserForm, RegisterForm, RecordForm, CaseForm
@@ -137,17 +139,25 @@ def hash_code(s, salt='mysite'):  # 加点盐
 # 查看单独病例
 # POST 参数为 rid
 def view_case(request):
-
+    if not request.session.get('is_login', None):
+        # 如果未登录则跳转到登陆界面
+        return redirect("/login")
     if request.method == "POST":
+        print(request.POST)
         record_id = request.POST.get('record_id')
+        result = {'code': 0}
         try:
             record = models.Record.objects.get(rid=record_id)
             # todo 进行属性校验，并且进行解密
             message = record.detail
+            result['data'] = model_to_dict(record)
         except:
             message = "病例不存在"
-    result = {'code': 0, 'msg': message}
-    return HttpResponse(json.dumps(result), content_type="application/json")
+        result['msg'] = message
+        return HttpResponse(json.dumps(result), content_type="application/json")
+
+    Record_Form = RecordForm()
+    return render(request, 'login/view_case.html', locals())
 
 
 # 查看病例列表
@@ -157,9 +167,9 @@ def case_list(request):
         print(request.POST)
         page = int(request.POST.get('page'))
         limit = int(request.POST.get('limit'))
-        _rid = request.POST.get('reload-rid')
-        _attr = request.POST.get('reload-attr')
-        _name = request.POST.get('reload-name')
+        _rid = request.POST.get('id_rid')
+        _attr = request.POST.get('id_attr')
+        _name = request.POST.get('id_name')
 
         record_list = models.Record.objects.all()
         try:
@@ -186,6 +196,7 @@ def case_list(request):
                 "name": record_list[i].name,
                 "sex": record_list[i].sex,
                 "age": record_list[i].age,
+                "attr": record_list[i].attr,
                 "time": record_list[i].time,
             })
         result = {'code': 0,
@@ -233,7 +244,6 @@ def add_case(request):
                     return HttpResponse(json.dumps(response), content_type="application/json")
 
             # 当一切都OK的情况下，创建新记录
-            print("check_is_ok")
             new_record = models.Record.objects.create()
 
             new_record.name = name

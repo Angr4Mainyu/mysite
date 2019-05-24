@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^logout$', views.logout),
     url(r'^case_list$', views.case_list),
     url(r'^add_case$', views.add_case),
+    url(r'^view_case$',views.view_case),
     url(r'^medical_record$', views.medical_record),
     url(r'^$', views.index),
 ]

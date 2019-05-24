@@ -104,15 +104,16 @@
             , method: 'POST'
             , id: "module"
             , totalRow: true
-            , toolbar: '#toolbar'
+            // , toolbar: '#toolbar'
             , limit: 10
             , page: true
             , cols: [[ //表头
-                { type: 'checkbox' },
+                // { type: 'checkbox' },
                 { field: 'id', title: '病历号', sort: true, totalRowText: '合计' },
                 { field: 'name', title: '姓名', sort: true },
                 { field: 'sex', title: '性别', sort: true },
                 { field: 'age', title: '年龄', sort: true },
+                { field: 'attr', title: '所属部门', sort: true },
                 { field: 'time', title: '操作时间', sort: true },
                 { title: '操作', toolbar: '#Headbar' }
             ]]
@@ -140,12 +141,11 @@
         table.on('tool(module)', function (obj) {
             var data = obj.data;
             // console.log(data)
-            var url = "item-search-evaluate?id=" + data["ZCH"];
             switch (obj.event) {
                 case 'edit':
                     break;
                 case 'view':
-                    parent.xadmin.add_tab(data["name"], 'medical_record.html')
+                    parent.xadmin.add_tab(data["name"], 'view_case?id=' + data["id"])
                     break;
                 case 'del':
                     layer.confirm('确认要删除吗？', function (index) {
@@ -222,11 +222,6 @@
             reload: function () {
                 //执行重载
                 console.log("start reload");
-                var key = {
-                    'reload-rid': $("#reload-id").val() == "" ? undefined : $("#reload-id").val(),
-                    'reload-attr': $("#reload-industry").val() == "" ? undefined : $("#reload-industry").val(),
-                    'reload-name': $("#reload-name").val() == "" ? undefined : $("#reload-name").val(),
-                }
                 tableIns.reload({
                     page: {
                         curr: 1 //重新从第 1 页开始
