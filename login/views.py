@@ -167,16 +167,16 @@ def case_list(request):
         print(request.POST)
         page = int(request.POST.get('page'))
         limit = int(request.POST.get('limit'))
-        _rid = request.POST.get('id_rid')
-        _attr = request.POST.get('id_attr')
-        _name = request.POST.get('id_name')
+        _rid = request.POST.get('reload-rid')
+        _attr = request.POST.get('reload-attr')
+        _name = request.POST.get('reload-name')
 
         record_list = models.Record.objects.all()
         try:
             if _rid != "" and _rid != None:
                 record_list = record_list.filter(rid=_rid)
             if _attr != "" and _attr != None:
-                record_list = record_list.filter(attr=_attr)
+                record_list = record_list.filter(attr__contains=_attr)
             if _name != "" and _name != None:
                 record_list = record_list.filter(name=_name)
         except:  # 没有符合条件的病历
@@ -197,7 +197,7 @@ def case_list(request):
                 "sex": record_list[i].sex,
                 "age": record_list[i].age,
                 "attr": record_list[i].attr,
-                "time": record_list[i].time,
+                "time": str(record_list[i].time),
             })
         result = {'code': 0,
                   'msg': "Query success",

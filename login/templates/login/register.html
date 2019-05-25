@@ -32,8 +32,38 @@
             <input type="text" placeholder="用户名" name="username" class="form-control" maxlength="128" required
                 id="id_username" lay-verify="required">
             <hr class="hr15">
-            <input type="text" placeholder="部门" name="attr" class="form-control" maxlength="1024" required
-                lay-verify="required" id="id_attr">
+            <select name="attr" required id="id_attr" lay-verify="required">
+                <option value="" selected="">请选择部门</option>
+
+                <option value="医疗部">医疗部</option>
+
+                <option value="门诊部">门诊部</option>
+
+                <option value="住院部">住院部</option>
+
+                <option value="医务部">医务部</option>
+
+                <option value="护理部">护理部</option>
+
+                <option value="住院部">住院部</option>
+
+                <option value="院长">院长</option>
+
+            </select>
+            <div class="layui-unselect layui-form-select layui-form-selected">
+                <div class="layui-select-title"><input type="text" placeholder="请选择部门" value="" readonly=""
+                        class="layui-input layui-unselect"><i class="layui-edge"></i></div>
+                <dl class="layui-anim layui-anim-upbit" style="">
+                    <dd lay-value="" class="layui-select-tips">请选择部门</dd>
+                    <dd lay-value="医疗部" class="">医疗部</dd>
+                    <dd lay-value="门诊部" class="">门诊部</dd>
+                    <dd lay-value="住院部" class="layui-this">住院部</dd>
+                    <dd lay-value="医务部" class="">医务部</dd>
+                    <dd lay-value="护理部" class="">护理部</dd>
+                    <dd lay-value="住院部" class="">住院部</dd>
+                    <dd lay-value="院长" class="">院长</dd>
+                </dl>
+            </div>
             <hr class="hr15">
             <input type="password" placeholder="密码" name="password1" class="form-control" maxlength="256"
                 lay-verify="required" id="id_password1">
