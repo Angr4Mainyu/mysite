@@ -1,8 +1,7 @@
 from django.db import models
 from .cpabe import PairingGroup, CPabe_sheme
 from charm.toolbox.pairinggroup import PairingGroup, ZR, G1, G2, GT, pair, serialize, deserialize
-
-attrs = ['医疗部', '门诊部', '住院部', '医务部', '护理部', '住院部', '院长']
+attrs = {'医疗部':'A', '门诊部':'B', '住院部':'C', '医务部':'D', '护理部':'E', '住院部':'F', '院长':'G'}
 groupObj = PairingGroup('SS512')
 cpabe = CPabe_sheme(groupObj)
 
@@ -20,10 +19,12 @@ class User(models.Model):
     def __str__(self):
         return self.name
 
-    def __key__(self):
+    def key(self):
         d = dict()
         data = self.K_x.split()
         attr_list = self.attr.strip().split(',')
+        for i in range(0,len(attr_list)):
+            attr_list[i]=attrs[attr_list[i]]
         for i in range(0, len(attr_list)):
             d[attr_list[i]] = groupObj.deserialize(
                 bytes(data[i], encoding='utf-8'))
@@ -54,6 +55,7 @@ class Record(models.Model):
     idcard = models.CharField(unique=True, max_length=128)
     attr = models.CharField(max_length=1024)
     time = models.DateTimeField(auto_now_add=True)
+    key=models.TextField()
     detail = models.TextField()
 
     def __str__(self):

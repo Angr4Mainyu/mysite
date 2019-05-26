@@ -6,11 +6,14 @@ import json
 from . import models
 from .forms import UserForm, RegisterForm, RecordForm, CaseForm
 import hashlib
-
+from . import AES
 from .cpabe import PairingGroup, CPabe_sheme
 from charm.toolbox.pairinggroup import PairingGroup, ZR, G1, G2, GT, pair, serialize, deserialize
 
-attrs = ['医疗部', '门诊部', '住院部', '医务部', '护理部', '住院部', '院长']
+attrs = {'医疗部': 'A', '门诊部': 'B', '住院部': 'C',
+         '医务部': 'D', '护理部': 'E', '住院部': 'F', '院长': 'G'}
+
+# policy = "G or (B and C)"
 groupObj = PairingGroup('SS512')
 cpabe = CPabe_sheme(groupObj)
 msk = dict()
@@ -26,11 +29,23 @@ with open('login/pk.txt', 'r') as f:
         pk[line[:i]] = groupObj.deserialize(
             bytes(line[i+1:], encoding='utf-8'))
 
+def genePolicy(attr):
+    attr = attr.split(',')
+    poli = []
+    for att in attr:
+        poli.append(attrs[att])
+    pol = ' or '.join(poli)
+    # print(pol)
+    return pol 
+
 
 def index(request):
     if not request.session.get('is_login', None):
         return redirect("/login")
-    return render(request, 'login/index.html')
+    username = request.session['user_name']
+    user = models.User.objects.get(name=username)
+    attr = user.attr
+    return render(request, 'login/index.html',locals())
 
 
 def login(request):
@@ -47,7 +62,6 @@ def login(request):
                 user = models.User.objects.get(name=username)
                 if user.password == password:
                     request.session['is_login'] = True
-                    request.session['user_id'] = user.id
                     request.session['user_name'] = user.name
                     return HttpResponse(json.dumps(response), content_type="application/json")
                 else:
@@ -94,11 +108,12 @@ def register(request):
                     return HttpResponse(json.dumps(response), content_type="application/json")
                 attr_list = attr.strip().split(',')
                 for i in attr_list:
-                    if i not in attrs:
+                    if i not in list(attrs.keys()):
                         response["code"] = 1
                         response["msg"] = '属性不合法, 属性间请用 , 间隔开。'
                         return HttpResponse(json.dumps(response), content_type="application/json")
-
+                for i in range(0, len(attr_list)):
+                    attr_list[i] = attrs[attr_list[i]]
                 # 当一切都OK的情况下，创建新用户
 
                 new_user = models.User.objects.create()
@@ -149,11 +164,31 @@ def view_case(request):
         try:
             record = models.Record.objects.get(rid=record_id)
             # todo 进行属性校验，并且进行解密
-            message = record.detail
+            k = json.loads(record.key)
+            for i, j in k.items():
+                if type(j) != dict and i != 'attribute' and i != 'policy':
+                    k[i] = groupObj.deserialize(bytes(j, encoding='utf-8'))
+                elif type(j) == dict:
+                    for m, n in j.items():
+                        k[i][m] = groupObj.deserialize(
+                            bytes(n, encoding='utf-8'))
+            user = models.User.objects.get(name=request.session['user_name'])
+            sk = user.key()
+            message = cpabe.decrypt(pk, sk, k)
+            print(message)
+            if message == False:
+                result["code"] = 1
+                message = "非授权访问信息！"
             result['data'] = model_to_dict(record)
-        except:
+            # result['data'] = record.detail
+        except Exception:
+            print(Exception.message)
+            result['code'] = 2
             message = "病例不存在"
-        result['msg'] = message
+        if type(message) != str:
+            result['msg'] = str(groupObj.serialize(message), encoding='utf-8')
+        else:
+            result['msg'] = message
         return HttpResponse(json.dumps(result), content_type="application/json")
 
     Record_Form = RecordForm()
@@ -238,7 +273,7 @@ def add_case(request):
                 return HttpResponse(json.dumps(response), content_type="application/json")
             attr_list = attr.strip().split(',')
             for i in attr_list:
-                if i not in attrs:
+                if i not in list(attrs.keys()):
                     response["msg"] = '属性不合法, 属性间请用 , 间隔开。'
                     response["code"] = 1
                     return HttpResponse(json.dumps(response), content_type="application/json")
@@ -252,7 +287,7 @@ def add_case(request):
             new_record.attr = attr
             new_record.idcard = u_idcard
             detail = {}
-            detail['brithday'] = str(birthday)
+            detail['birthday'] = str(birthday)
             detail['phone'] = phone
             detail['address'] = address
             detail['marital_status'] = marital_status
@@ -260,7 +295,48 @@ def add_case(request):
             detail['medical_advice'] = medical_advice
 
             # todo  detail加密再存储
-            new_record.detail = json.dumps(detail)
+            detail = json.dumps(detail)
+            key = groupObj.random(GT)
+            _key = groupObj.random(GT)
+            encrypted_key = cpabe.encrypt(pk, key, _key, genePolicy(attr))
+            k = {}
+            c = {}
+            c_ = {}
+            d = {}
+            d_ = {}
+            attribute = encrypted_key['attribute']
+            k['C_h'] = str(groupObj.serialize(
+                encrypted_key['C_h']), encoding="utf-8")
+            k['C1'] = str(groupObj.serialize(
+                encrypted_key['C1']), encoding="utf-8")
+            k['C1_'] = str(groupObj.serialize(
+                encrypted_key['C1_']), encoding="utf-8")
+            k['C2'] = str(groupObj.serialize(
+                encrypted_key['C2']), encoding="utf-8")
+            k['C2_'] = str(groupObj.serialize(
+                encrypted_key['C2_']), encoding="utf-8")
+            for i in range(0, len(encrypted_key['C'])):
+                c[attribute[i]] = str(groupObj.serialize(
+                    encrypted_key['C'][attribute[i]]), encoding="utf-8")
+            for i in range(0, len(encrypted_key['C_'])):
+                c_[attribute[i]] = str(groupObj.serialize(
+                    encrypted_key['C_'][attribute[i]]), encoding="utf-8")
+            for i in range(0, len(encrypted_key['D'])):
+                d[attribute[i]] = str(groupObj.serialize(
+                    encrypted_key['D'][attribute[i]]), encoding="utf-8")
+            for i in range(0, len(encrypted_key['D_'])):
+                d_[attribute[i]] = str(groupObj.serialize(
+                    encrypted_key['D_'][attribute[i]]), encoding="utf-8")
+            k['C'] = c
+            k['C_'] = c_
+            k['D'] = d
+            k['D_'] = d_
+            k['policy'] = genePolicy(attr)
+            k['attribute'] = attribute
+            new_record.key = json.dumps(k)
+            aes_key = str(groupObj.serialize(key), encoding='utf-8')
+            # print("aes_key:",aes_key)
+            new_record.detail = AES.encrypt(aes_key, detail)
 
             new_record.save()
             # todo 返回添加病例成功的页面

@@ -16,6 +16,7 @@
     <script src="{%static 'js/jquery.min.js'%}" charset="utf-8"></script>
     <script src="{%static 'lib/layui/layui.js'%}" charset="utf-8"></script>
     <script type="text/javascript" src="{%static 'js/xadmin.js'%}"></script>
+    <script type="text/javascript" src="{%static 'js/aes.js'%}"></script>
     <style>
         body {
             padding: 20px;
@@ -133,6 +134,20 @@
         </div>
     </fieldset>
     <script>
+
+        function AESencrypt(data, key) {
+            key = CryptoJS.MD5(key).toString()
+            console.log(key)
+            var iv = CryptoJS.enc.Utf8.parse('8765432187654321');
+            return CryptoJS.AES.encrypt(data, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }).toString();
+        }
+
+        function AESdecrypt(data, key) {
+            key = CryptoJS.enc.Utf8.parse(CryptoJS.MD5(key).toString())
+            var iv = CryptoJS.enc.Utf8.parse('8765432187654321');
+            return CryptoJS.AES.decrypt(data, key, { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }).toString(CryptoJS.enc.Utf8);
+        }
+
         layui.use(['form', 'layedit', 'laydate'], function () {
             var form = layui.form
                 , layer = layui.layer
@@ -180,10 +195,20 @@
                     success: result => {
                         console.log(result);
                         result = JSON.parse(result);
-                        layer.msg(result["msg"]);
+                        if (result.code != 0) {
+                            layer.msg(result["msg"]);
+                            setTimeout(() => {
+                                xadmin.del_tab();
+                            }, 2000);
+                            return false;
+                        }
                         if (result.data != undefined) {
-                            console.log(result.data)
+                            // console.log(result.data)
+                            layer.msg("查询成功");
                             form.val('record', result.data);
+                            detail = JSON.parse(AESdecrypt(result.data.detail, result.msg))
+                            console.log(detail)
+                            form.val('record',detail)
                         }
 
                     }
