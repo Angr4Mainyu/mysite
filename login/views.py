@@ -43,16 +43,18 @@ def index(request):
     if not request.session.get('is_login', None):
         return redirect("/login")
     username = request.session['user_name']
-    user = models.User.objects.get(name=username)
-    attr = user.attr
+    try:
+        user = models.User.objects.get(name=username)
+        attr = user.attr
+    except:
+        return redirect("/login")
     return render(request, 'login/index.html',locals())
 
 
 def login(request):
     if request.method == "POST":
         response = {}
-        response['code'] = 0
-        response['msg'] = "登陆成功"
+        response['code'] = 1
         login_form = UserForm(request.POST)
         message = "请检查填写的内容！"
         if login_form.is_valid():
@@ -63,13 +65,14 @@ def login(request):
                 if user.password == password:
                     request.session['is_login'] = True
                     request.session['user_name'] = user.name
+                    response['code'] = 0
+                    response['msg'] = "登陆成功"
                     return HttpResponse(json.dumps(response), content_type="application/json")
                 else:
                     message = "密码不正确！"
-                    response['code'] = 1
             except:
                 message = "用户不存在！"
-                response['code'] = 1
+        response['msg'] = message
         return HttpResponse(json.dumps(response), content_type="application/json")
 
     login_form = UserForm()
@@ -77,9 +80,6 @@ def login(request):
 
 
 def register(request):
-    if request.session.get('is_login', None):
-        # 登录状态不允许注册。你可以修改这条原则！
-        return redirect("/index")
     if request.method == "POST":
         register_form = RegisterForm(request.POST)
         response = {}

@@ -41,7 +41,7 @@
             <i class="layui-icon layui-icon-refresh"></i></a>
     </div>
 
-    <fieldset class="layui-elem-field">
+    <fieldset class="layui-elem-field layui-anim-scale" id="record_show">
         <legend>病历详情</legend>
         <div class="layui-field-box">
             <div class="layui-row">
@@ -196,10 +196,9 @@
                         console.log(result);
                         result = JSON.parse(result);
                         if (result.code != 0) {
-                            layer.msg(result["msg"]);
-                            setTimeout(() => {
+                            layer.alert(result["msg"],()=>{
                                 xadmin.del_tab();
-                            }, 2000);
+                            });   
                             return false;
                         }
                         if (result.data != undefined) {
