@@ -45,70 +45,63 @@
         <legend>病历详情</legend>
         <div class="layui-field-box">
             <div class="layui-row">
-                <form class="layui-form layui-form-pane layui-anim-scale" id="record" lay-filter="record">
+                <form class="layui-form layui-form-pane layui-anim-scale layui-col-md8" id="record" lay-filter="record">
                     {% csrf_token %}
-                    <div class="layui-form-item">
-                        <div class="layui-inline">
-                            <label class="layui-form-label">{{Record_Form.name.label}}</label>
-                            <div class="layui-input-inline">
-                                {{Record_Form.name}}
-                            </div>
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">{{Record_Form.name.label}}</label>
+                        <div class="layui-input-inline layui-col-md1">
+                            {{Record_Form.name}}
                         </div>
-                        <div class="layui-inline">
-                            <label class="layui-form-label">{{Record_Form.sex.label}}</label>
-                            <div class="layui-input-inline">
-                                {{Record_Form.sex}}
-                            </div>
+                    </div>
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">{{Record_Form.sex.label}}</label>
+                        <div class="layui-input-inline layui-col-md1">
+                            {{Record_Form.sex}}
                         </div>
-                        <div class="layui-inline">
-                            <label class="layui-form-label">{{Record_Form.age.label}}</label>
-                            <div class="layui-input-inline">
-                                {{Record_Form.age}}
-                            </div>
+                    </div>
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">{{Record_Form.age.label}}</label>
+                        <div class="layui-input-inline layui-col-md1">
+                            {{Record_Form.age}}
                         </div>
                     </div>
 
 
-                    <div class="layui-form-item">
-                        <div class="layui-inline">
-                            <label class="layui-form-label">{{Record_Form.idcard.label}}</label>
-                            <div class="layui-input-inline">
-                                {{Record_Form.idcard}}
-                            </div>
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">{{Record_Form.idcard.label}}</label>
+                        <div class="layui-input-inline layui-col-md1">
+                            {{Record_Form.idcard}}
                         </div>
-                        <div class="layui-inline">
-
-                            <label class="layui-form-label">{{Record_Form.marital_status.label}}</label>
-                            <div class="layui-input-inline">
-                                {{Record_Form.marital_status}}
-                            </div>
+                    </div>
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">{{Record_Form.marital_status.label}}</label>
+                        <div class="layui-input-inline layui-col-md1">
+                            {{Record_Form.marital_status}}
                         </div>
-                        <div class="layui-inline">
-                            <label class="layui-form-label">{{Record_Form.birthday.label}}</label>
-                            <div class="layui-input-inline">
-                                {{Record_Form.birthday}}
-                            </div>
+                    </div>
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">{{Record_Form.birthday.label}}</label>
+                        <div class="layui-input-inline layui-col-md1">
+                            {{Record_Form.birthday}}
                         </div>
                     </div>
 
-                    <div class="layui-form-item">
-                        <div class="layui-inline">
-                            <label class="layui-form-label">{{Record_Form.attr.label}}</label>
-                            <div class="layui-input-inline">
-                                {{Record_Form.attr}}
-                            </div>
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">{{Record_Form.attr.label}}</label>
+                        <div class="layui-input-inline layui-col-md1">
+                            {{Record_Form.attr}}
                         </div>
-                        <div class="layui-inline">
-                            <label class="layui-form-label">{{Record_Form.address.label}}</label>
-                            <div class="layui-input-inline">
-                                {{Record_Form.address}}
-                            </div>
+                    </div>
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">{{Record_Form.address.label}}</label>
+                        <div class="layui-input-inline layui-col-md1">
+                            {{Record_Form.address}}
                         </div>
-                        <div class="layui-inline">
-                            <label class="layui-form-label">{{Record_Form.phone.label}}</label>
-                            <div class="layui-input-inline">
-                                {{Record_Form.phone}}
-                            </div>
+                    </div>
+                    <div class="layui-form-item layui-inline">
+                        <label class="layui-form-label">{{Record_Form.phone.label}}</label>
+                        <div class="layui-input-inline layui-col-md1">
+                            {{Record_Form.phone}}
                         </div>
                     </div>
                     <div class="layui-form-item layui-form-text">
@@ -132,7 +125,7 @@
                 </form>
             </div>
         </div>
-    </fieldset>
+    <!-- </fieldset> -->
     <script>
 
         function AESencrypt(data, key) {
@@ -196,9 +189,9 @@
                         console.log(result);
                         result = JSON.parse(result);
                         if (result.code != 0) {
-                            layer.alert(result["msg"],()=>{
+                            layer.alert(result["msg"], () => {
                                 xadmin.del_tab();
-                            });   
+                            });
                             return false;
                         }
                         if (result.data != undefined) {
@@ -207,7 +200,7 @@
                             form.val('record', result.data);
                             detail = JSON.parse(AESdecrypt(result.data.detail, result.msg))
                             console.log(detail)
-                            form.val('record',detail)
+                            form.val('record', detail)
                         }
 
                     }

@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
     <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
     <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{%static 'js/sha256.js'%}"></script>
     <!--[if lt IE 9]>
       <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
       <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
@@ -97,9 +98,13 @@
 
                 //监听提交
                 form.on('submit(register)', function (data) {
+                    var post_data = data.field;
+                    post_data['password1'] = CryptoJS.SHA256(data.field['password1']).toString();
+                    post_data['password2'] = CryptoJS.SHA256(data.field['password2']).toString();
+                    console.log(post_data);
                     $.ajax({
                         url: '/register',
-                        data: data.field,
+                        data: post_data,
                         dataType: 'text',
                         type: 'post',
                         success: function (data) {

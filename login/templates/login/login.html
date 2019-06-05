@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="{% static 'css/xadmin.css' %}">
     <script type="text/javascript" src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
     <script src="{% static 'lib/layui/layui.js' %}" charset="utf-8"></script>
+    <script type="text/javascript" src="{%static 'js/sha256.js'%}"></script>
     <!--[if lt IE 9]>
       <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
       <script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
@@ -56,14 +57,18 @@
 
                 //监听提交
                 form.on('submit(login)', function (data) {
+                    var post_data = data.field;
+                    post_data['password'] = CryptoJS.SHA256(data.field['password']).toString();
+                    console.log(post_data);
                     $.ajax({
                         url: '/login',
-                        data: data.field,
+                        data: post_data,
                         dataType: 'text',
                         type: 'post',
                         success: function (data) {
                             console.log(data);
                             data = JSON.parse(data);
+                            
                             layer.msg(data["msg"]);
                             if (data["code"] == '0') {
                                 location.href = "/index";

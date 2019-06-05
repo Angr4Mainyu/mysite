@@ -70,9 +70,9 @@
             </form>
         </div>
     </fieldset>
-    <div class="layui-anim-scale">
-        <table class="layui-table" id="module" lay-filter="module" tablename="list"></table>
-    </div>
+    <!-- <div class="layui-anim-scale"> -->
+    <table class="layui-table" id="module" lay-filter="module" tablename="list"></table>
+    <!-- </div> -->
 </body>
 
 <script type="text/html" id="Headbar">
@@ -103,6 +103,8 @@
             }
             , method: 'POST'
             , id: "module"
+            // , width:500
+            , cellMinWidth: 80
             , totalRow: true
             // , toolbar: '#toolbar'
             , limit: 10
@@ -113,9 +115,9 @@
                 { field: 'name', title: '姓名', sort: true },
                 { field: 'sex', title: '性别', sort: true },
                 { field: 'age', title: '年龄', sort: true },
-                { field: 'attr', title: '所属部门', sort: true },
-                { field: 'time', title: '操作时间', sort: true },
-                { title: '操作', toolbar: '#Headbar' }
+                { field: 'attr', title: '所属部门', width: 120, sort: true },
+                { field: 'time', title: '操作时间', width: 130, sort: true },
+                { title: '操作', toolbar: '#Headbar' , width: 150}
             ]]
         });
 
